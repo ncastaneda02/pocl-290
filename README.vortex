@@ -27,6 +27,11 @@ export TOOLDIR=$HOME/tools
 
 ## Building LLVM for Vortex
 
+# NOTE(hansung): use system cmake (/usr/bin/cmake), otherwise cmake complains
+# something about llvm-ranlib missing. Also use
+# -LLVM_ENABLE_PROJECTS="clang;libcxx;libcxxabi;libunwind" instead of separate
+# LLVM_ENABLE_RUNTIMES.
+
 - git clone -b vortex https://github.com/vortexgpgpu/llvm.git llvm
 - cd llvm
 - mkdir build && cd build
@@ -61,6 +66,8 @@ export TOOLDIR=$HOME/tools
 - export POCL_CC_PATH=$TOOLDIR/pocl/compiler
 - cmake -G Ninja -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX=$POCL_CC_PATH -DOCS_AVAILABLE=ON -DWITH_LLVM_CONFIG=$LLVM_VORTEX/bin/llvm-config -DENABLE_VORTEX=ON -DBUILD_TESTS=OFF -DPOCL_DEBUG_MESSAGES=ON -DENABLE_ICD=OFF -DCLANG_MARCH_FLAG:STRING=-mcpu= -DLLC_HOST_CPU=generic-rv32 ..
 - cmake --build . --target install
+# NOTE(hansung): what worked for me:
+# /usr/bin/cmake -G Ninja -DCMAKE_EXPORT_COMPILE_COMMANDS=ON -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX=/scratch/hansung/build/pocl-vortex2/compiler -DOCS_AVAILABLE=ON -DWITH_LLVM_CONFIG=/scratch/hansung/build/llvm-vortex2/bin/llvm-config -DENABLE_VORTEX=ON -DBUILD_TESTS=OFF -DPOCL_DEBUG_MESSAGES=ON -DENABLE_ICD=OFF -DCLANG_MARCH_FLAG:STRING=-mcpu= -DLLC_HOST_CPU=generic-rv32 ..
 
 - mkdir build_rt && cd build_rt
 - export POCL_RT_PATH=$TOOLDIR/pocl/runtime
@@ -68,3 +75,5 @@ export TOOLDIR=$HOME/tools
 - export VORTEX_DRIVER_LIB=~/dev/vortex/runtime/stub/libvortex.so
 - cmake -G Ninja -DCMAKE_BUILD_TYPE=Release -DHOST_DEVICE_BUILD_HASH=riscv32-unknown-unknown-elf -DCMAKE_INSTALL_PREFIX=$POCL_RT_PATH -DOCS_AVAILABLE=OFF -DENABLE_LLVM=OFF -DVORTEX_DRIVER_INC=$VORTEX_DRIVER_INC -DVORTEX_DRIVER_LIB=$VORTEX_DRIVER_LIB -DENABLE_VORTEX=ON -DBUILD_TESTS=OFF -DPOCL_DEBUG_MESSAGES=ON -DENABLE_ICD=OFF ..
 - cmake --build . --target install
+# NOTE(hansung): what I used:
+# cmake -G Ninja -DCMAKE_EXPORT_COMPILE_COMMANDS=On -DCMAKE_BUILD_TYPE=Release -DHOST_DEVICE_BUILD_HASH=riscv32-unknown-unknown-elf -DCMAKE_INSTALL_PREFIX=/scratch/hansung/build/pocl-vortex2/runtime -DOCS_AVAILABLE=OFF -DENABLE_LLVM=OFF -DVORTEX_DRIVER_INC=/scratch/hansung/src/vortex2/runtime/include -DVORTEX_DRIVER_LIB=/scratch/hansung/src/vortex2/runtime/stub/libvortex.so -DENABLE_VORTEX=ON -DBUILD_TESTS=OFF -DPOCL_DEBUG_MESSAGES=ON -DENABLE_ICD=OFF ..
