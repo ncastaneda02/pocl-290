@@ -763,8 +763,15 @@ pocl_vortex_run (void *data, _cl_command_node *cmd)
 
     // upload kernel arguments buffer
     vx_err = vx_copy_to_dev(d->vx_device, args_base_addr, abuf_ptr, abuf_size);
+    printf("%s: uploading argument buffer to device, device mem address=%x, "
+           "size=%lu bytes\n",
+           __func__, args_base_addr, abuf_size);
     if (vx_err != 0) {
       POCL_ABORT("POCL_VORTEX_RUN\n");
+    }
+    vx_err = pocl_write_file("args.bin", abuf_ptr, abuf_size, 0, 0);
+    if (vx_err != 0) {
+      POCL_ABORT("POCL_VORTEX_RUN_WRITE_FILE\n");
     }
 
     // release staging buffer
