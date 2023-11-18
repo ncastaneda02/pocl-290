@@ -163,11 +163,14 @@ int pocl_llvm_build_vortex_program(cl_kernel kernel,
       wrapper_cc_s = std::string(wrapper_cc);
     }
     {
-      char kernel_elf[POCL_MAX_PATHNAME_LENGTH + 1];
-      int err = pocl_mk_tempname(kernel_elf, "/tmp/pocl_vortex_kernel", ".elf", nullptr);
-      if (err != 0)
-        return err;
-      kernel_elf_s = std::string(kernel_elf);
+      // char kernel_elf[POCL_MAX_PATHNAME_LENGTH + 1];
+      // int err = pocl_mk_tempname(kernel_elf, "/tmp/pocl_vortex_kernel", ".elf", nullptr);
+      // if (err != 0)
+      //   return err;
+      // kernel_elf_s = std::string(kernel_elf);
+
+      // NOTE(hansung): write ELF file next to the kernel.pocl binary
+      kernel_elf_s = std::string{basename(kernel_out)} + ".elf";
     }
     StaticStrFormat ssfmt(9);
 
