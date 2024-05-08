@@ -568,50 +568,50 @@ WorkitemLoops::ProcessFunction(Function &F)
       l = CreateVortexCMLoop(*original, l.first, l.second, tmdata);
 
     } else if (WGDynamicLocalSize) {
-      // GlobalVariable *gv;
-      // gv = M->getGlobalVariable("_local_size_x");
-      // if (gv == NULL)
-      //   gv = new GlobalVariable(*M, SizeT, true, GlobalValue::CommonLinkage,
-      //                           NULL, "_local_size_x", NULL,
-      //                           GlobalValue::ThreadLocalMode::NotThreadLocal,
-      //                           0, true);
+      GlobalVariable *gv;
+      gv = M->getGlobalVariable("_local_size_x");
+      if (gv == NULL)
+        gv = new GlobalVariable(*M, SizeT, true, GlobalValue::CommonLinkage,
+                                NULL, "_local_size_x", NULL,
+                                GlobalValue::ThreadLocalMode::NotThreadLocal,
+                                0, true);
 
-      // l = CreateLoopAround(*original, l.first, l.second, peelFirst,
-      //                      LocalIdXGlobal, WGLocalSizeX, !unrolled, gv);
+      l = CreateLoopAround(*original, l.first, l.second, peelFirst,
+                           LocalIdXGlobal, WGLocalSizeX, !unrolled, gv);
 
-      // gv = M->getGlobalVariable("_local_size_y");
-      // if (gv == NULL)
-      //   gv = new GlobalVariable(*M, SizeT, false, GlobalValue::CommonLinkage,
-      //                           NULL, "_local_size_y");
+      gv = M->getGlobalVariable("_local_size_y");
+      if (gv == NULL)
+        gv = new GlobalVariable(*M, SizeT, false, GlobalValue::CommonLinkage,
+                                NULL, "_local_size_y");
 
-      // l = CreateLoopAround(*original, l.first, l.second,
-      //                      false, LocalIdYGlobal, WGLocalSizeY, !unrolled, gv);
+      l = CreateLoopAround(*original, l.first, l.second,
+                           false, LocalIdYGlobal, WGLocalSizeY, !unrolled, gv);
 
-      // gv = M->getGlobalVariable("_local_size_z");
-      // if (gv == NULL)
-      //   gv = new GlobalVariable(*M, SizeT, true, GlobalValue::CommonLinkage,
-      //                           NULL, "_local_size_z", NULL,
-      //                           GlobalValue::ThreadLocalMode::NotThreadLocal,
-      //                           0, true);
+      gv = M->getGlobalVariable("_local_size_z");
+      if (gv == NULL)
+        gv = new GlobalVariable(*M, SizeT, true, GlobalValue::CommonLinkage,
+                                NULL, "_local_size_z", NULL,
+                                GlobalValue::ThreadLocalMode::NotThreadLocal,
+                                0, true);
 
-      // l = CreateLoopAround(*original, l.first, l.second,
-      //                      false, LocalIdZGlobal, WGLocalSizeZ, !unrolled, gv);
+      l = CreateLoopAround(*original, l.first, l.second,
+                           false, LocalIdZGlobal, WGLocalSizeZ, !unrolled, gv);
 
     } else {
-      // if (WGLocalSizeX > 1) {
-      //   l = CreateLoopAround(*original, l.first, l.second, peelFirst,
-      //                        LocalIdXGlobal, WGLocalSizeX, !unrolled);
-      // }
+      if (WGLocalSizeX > 1) {
+        l = CreateLoopAround(*original, l.first, l.second, peelFirst,
+                             LocalIdXGlobal, WGLocalSizeX, !unrolled);
+      }
 
-      // if (WGLocalSizeY > 1) {
-      //   l = CreateLoopAround(*original, l.first, l.second, false,
-      //                        LocalIdYGlobal, WGLocalSizeY);
-      // }
+      if (WGLocalSizeY > 1) {
+        l = CreateLoopAround(*original, l.first, l.second, false,
+                             LocalIdYGlobal, WGLocalSizeY);
+      }
 
-      // if (WGLocalSizeZ > 1) {
-      //   l = CreateLoopAround(*original, l.first, l.second, false,
-      //                        LocalIdZGlobal, WGLocalSizeZ);
-      // }
+      if (WGLocalSizeZ > 1) {
+        l = CreateLoopAround(*original, l.first, l.second, false,
+                             LocalIdZGlobal, WGLocalSizeZ);
+      }
     }
 
     /* Loop edges coming from another region mean B-loops which means 

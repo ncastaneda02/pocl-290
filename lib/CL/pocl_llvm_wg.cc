@@ -278,18 +278,19 @@ static PassManager &kernel_compiler_passes(cl_device_id device) {
     passes.push_back("workitemrepl");
     //passes.push_back("print-module");
     passes.push_back("subcfgformation");
-    // subcfgformation before workitemloops, as wiloops creates the loops for
-    // kernels without barriers, but after the transformation the kernel looks
-    // like it has barriers, so subcfg would do its thing.
+    // // subcfgformation before workitemloops, as wiloops creates the loops for
+    // // kernels without barriers, but after the transformation the kernel looks
+    // // like it has barriers, so subcfg would do its thing.
     passes.push_back("workitemloops");
-    // Remove the (pseudo) barriers.   They have no use anymore due to the
-    // work-item loop control taking care of them.
+    // // Remove the (pseudo) barriers.   They have no use anymore due to the
+    // // work-item loop control taking care of them.
     #ifdef BUILD_VORTEX
       passes.push_back("vortex-barriers");
     #endif 
     passes.push_back("remove-barriers");
   }
 
+  // IMPORTANT:
   // Add the work group launcher functions and privatize the pseudo variable
   // (local id) accesses. We have to do this late because we rely on aggressive
   // inlining to expose the _{local,group}_id accesses which will be replaced

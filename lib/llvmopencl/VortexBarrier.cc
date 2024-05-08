@@ -44,6 +44,8 @@ static RegisterPass<VortexBarrierLowering>
 
 static void recursivelyFind(Function* F, std::set<Instruction*>& barriers)
 {
+  std::cerr << "Searching for barriers in: " << F->getName().str()
+          << std::endl;
 
 #ifdef DEBUG_VORTEX_CONVERT
   std::cerr << "### VortexBarrierLowering: SCANNING " << F->getName().str()
@@ -75,6 +77,9 @@ static void recursivelyFind(Function* F, std::set<Instruction*>& barriers)
           if (llvm::isa<llvm::ReturnInst>(instr->getNextNode()))
             continue;
 
+        std::cerr << "Found a barrier in: " << func_name
+                << std::endl;
+
         barriers.insert(instr);
 
       }else {
@@ -87,17 +92,26 @@ static void recursivelyFind(Function* F, std::set<Instruction*>& barriers)
 
 bool VortexBarrierLowering::runOnModule(Module& M)
 {
+  std::string KernelName;
+  getModuleStringMetadata(M, "KernelName", KernelName);
 
+  std::cerr << "Creating vortex barriers in: " << KernelName
+          << std::endl;
   int vortex_scheduling_flag = 0;  
-  if(std::getenv("VORTEX_SCHEDULE_FLAG") != nullptr)
-    std::stoi(std::string(std::getenv("VORTEX_SCHEDULE_FLAG")));
-  if(vortex_scheduling_flag == 0)
-    return false;
+  if(std::getenv("VORTEX_SCHEDULE_FLAG") != nullptr) {
+    std::cerr << "Vortex on? " << std::string(std::getenv("VORTEX_SCHEDULE_FLAG"))
+          << std::endl;
+    vortex_scheduling_flag = std::stoi(std::string(std::getenv("VORTEX_SCHEDULE_FLAG")));
+  }
+  
+  // if(vortex_scheduling_flag == 0)
+  //   return false;
+
+    std::cerr << "Vortex really on? " << vortex_scheduling_flag
+          << std::endl;
 
   std::set<Instruction*> barriers;
 
-  std::string KernelName;
-  getModuleStringMetadata(M, "KernelName", KernelName);
 
   if(KernelName == "")
     return false;
@@ -134,10 +148,12 @@ bool VortexBarrierLowering::runOnModule(Module& M)
     int curBNum_ = 1;
     for (auto B : barriers) {
       IRBuilder<> builder(B);
-      CallInst* nW = builder.CreateCall(nWC);
+      //CallInst* nW = builder.CreateCall(nWC);
       auto curBNum = llvm::ConstantInt::get(
           context, llvm::APInt(32, curBNum_++, false));
-      CallInst* vxbar = builder.CreateCall(VXBarF, { curBNum, nW });
+      auto numW = llvm::ConstantInt::get(
+          context, llvm::APInt(32, 8, false));
+      CallInst* vxbar = builder.CreateCall(VXBarF, { curBNum, numW });
     }
     return true;
   }
